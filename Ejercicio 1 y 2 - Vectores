@@ -1,0 +1,144 @@
+LIBRERIA: 
+//directivas de preprocesador y evitan que el archivo se incluya más de una vez en un mismo programa.
+#ifndef VECTOR_H //Verifica si no se ha definido VECTOR_H antes.
+#define VECTOR_H //Lo define para que no se vuelva a incluir.
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T> class Vector { //T es un tipo genérico que será reemplazado con un tipo específico cuando se cree un objeto Vector<int>, Vector<double>, etc.
+  protected:
+    T *items; //Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; //numero actual de los elementos almacenados.
+    int capacity; //tamaño máximo que puede almacenar.
+
+
+//CONSTRUCTOR DE LA CLASE
+  public:
+    Vector(int _capacity = 10) : size(0), capacity(_capacity)
+    {
+        items = new T[capacity]; //Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+//DESTRUCTOR
+    ~Vector()
+    {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    void pushBack(const T &value) //Agrega un elemento al final del vector
+    {
+        if (size == capacity) //Si size == capacity, duplica la capacidad (resize(capacity * 2)).
+        {
+            resize(capacity * 2);
+        }
+        items[size++] = value;
+    }
+
+    T at(int index) const //Retorna el elemento en la posición index.
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value.
+    void set(int index, T value)
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector.
+    int getSize() const
+    {
+        return size;
+    }
+
+    int getCapacity() const
+    {
+        return capacity;
+    }
+
+    void resize(int newCapacity)
+    {
+        if (newCapacity <= capacity)
+            return;
+
+        T *newItems = new T[newCapacity];//arreglo dinamico
+        for (int i = 0; i < size; i++)
+        {
+            newItems[i] = items[i];
+        }
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+};
+
+#endif // VECTOR_H
+
+CODIGO: 
+#include "Vector.h"
+#include <iostream>
+
+using namespace std;
+
+    bool es_simetrico(Vector<int>* v) {
+        Vector<int> NuevoVector;
+        for(int i = 0; i < v->getSize(); i++){
+            NuevoVector.pushBack(v->at(i));
+        }
+        int j = NuevoVector.getSize()-1;
+        for( int i=0 ; i<NuevoVector.getSize()/2 ; i++){
+            if (NuevoVector.at(i) != NuevoVector.at(j)){
+                return false;
+            }
+            j--;
+        }
+        return true;
+    }
+
+    int SumaPares(Vector<int>* v){ 
+        int suma=0;
+        for (int i=0 ; i<v->getSize() ; i++){
+            if(v->at(i)%2==0){
+                suma += v->at(i);
+            }
+        }
+        return suma;
+    }
+
+int main() {
+    Vector<int> v;
+
+    v.pushBack(1);
+    v.pushBack(2);
+    v.pushBack(3);
+    v.pushBack(2);
+    v.pushBack(1);
+
+    cout << "Vector: ";
+    v.print();
+
+    cout << "¿Es simétrico? " << (es_simetrico(&v) ? "Sí" : "No") << endl;
+    cout << "Suma de pares: "<<SumaPares(&v) << endl;
+
+    return 0;
+}
