@@ -1,0 +1,153 @@
+LIBRERIA:
+#ifndef MATRIZ_H
+#define MATRIZ_H
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+template <typename T, int ROWS, int COLS>
+class Matrix {
+  protected:
+    T m[ROWS][COLS];
+
+  public:
+    Matrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                m[i][j] = T();
+            }
+        }
+    }
+
+    T at(int row, int col) const
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return m[row][col];
+    }
+
+    void set(int row, int col, T value)
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        m[row][col] = value;
+    }
+
+    int numRows() const
+    {
+        return ROWS;
+    }
+    int numCols() const
+    {
+        return COLS;
+    }
+
+    void print() const
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout << m[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+#endif
+
+CODIGO: 
+#include <iostream>
+#include <string>
+#include "Matrix.h"
+using namespace std;
+
+class GestionCalificaciones {
+private:
+    Matrix<float, 4, 4> calificaciones;
+
+public:
+    string estudiantes[4] = {"Flavia", "Mateo", "Fernanda", "Carlos"};
+    string materias[4] = {"E.D", "Calc", "Est", "Red"};
+
+    void establecerCalificacion(int estudiante, int materia, float calificacion) {
+        calificaciones.set(estudiante, materia, calificacion);
+    }
+
+    void calcularPromedioEstudiantes() const {
+        for (int i = 0; i < 4; i++) {
+            float suma = 0;
+            for (int j = 0; j < 4; j++) {
+                suma += calificaciones.at(i, j);
+            }
+            cout << "Promedio de " << estudiantes[i] << ": " << suma / 4.0 << endl;
+        }
+    }
+
+    void calcularPromedioGeneral() const {
+        float sumaTotal = 0;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                sumaTotal += calificaciones.at(i, j);
+            }
+        }
+        cout << "Promedio general del curso: " << sumaTotal / (4 * 4.0) << endl;
+    }
+
+    void mostrarCalificaciones() const {
+        cout << "Calificaciones de los estudiantes:" << endl;
+        cout << "       ";
+        for (int j = 0; j < 4; j++) {
+            cout << materias[j] << "   ";
+        }
+        cout << endl;
+
+        for (int i = 0; i < 4; i++) {
+            cout << estudiantes[i] << " ";
+            for (int j = 0; j < 4; j++) {
+                cout << calificaciones.at(i, j) << "   ";
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    GestionCalificaciones gestion;
+
+    gestion.establecerCalificacion(0, 0, 85.5); // Flavia, Estructura de Datos
+    gestion.establecerCalificacion(0, 1, 92.0); // Flavia, Cálculo
+    gestion.establecerCalificacion(0, 2, 88.5); // Flavia, Estadística
+    gestion.establecerCalificacion(0, 3, 90.0); // Flavia, Redes
+
+    gestion.establecerCalificacion(1, 0, 78.0); // Mateo, Estructura de Datos
+    gestion.establecerCalificacion(1, 1, 80.0); // Mateo, Cálculo
+    gestion.establecerCalificacion(1, 2, 75.0); // Mateo, Estadística
+    gestion.establecerCalificacion(1, 3, 79.5); // Mateo, Redes
+
+    gestion.establecerCalificacion(2, 0, 90.0); // Fernanda, Estructura de Datos
+    gestion.establecerCalificacion(2, 1, 93.0); // Fernanda, Cálculo
+    gestion.establecerCalificacion(2, 2, 89.5); // Fernanda, Estadística
+    gestion.establecerCalificacion(2, 3, 91.0); // Fernanda, Redes
+
+    gestion.establecerCalificacion(3, 0, 82.5); // Carlos, Estructura de Datos
+    gestion.establecerCalificacion(3, 1, 85.0); // Carlos, Cálculo
+    gestion.establecerCalificacion(3, 2, 87.0); // Carlos, Estadística
+    gestion.establecerCalificacion(3, 3, 88.0); // Carlos, Redes
+
+    gestion.mostrarCalificaciones();
+
+    gestion.calcularPromedioEstudiantes();
+
+    gestion.calcularPromedioGeneral();
+
+    return 0;
+}
