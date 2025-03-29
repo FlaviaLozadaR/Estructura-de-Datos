@@ -1,0 +1,209 @@
+LIBRERIA: 
+//directivas de preprocesador y evitan que el archivo se incluya más de una vez en un mismo programa.
+#ifndef VECTOR_H //Verifica si no se ha definido VECTOR_H antes.
+#define VECTOR_H //Lo define para que no se vuelva a incluir.
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T> class Vector { //T es un tipo genérico que será reemplazado con un tipo específico cuando se cree un objeto Vector<int>, Vector<double>, etc.
+  protected:
+    T *items; //Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; //numero actual de los elementos almacenados.
+    int capacity; //tamaño máximo que puede almacenar.
+
+
+//CONSTRUCTOR DE LA CLASE
+  public:
+    Vector(int _capacity = 10) : size(0), capacity(_capacity)
+    {
+        items = new T[capacity]; //Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+//DESTRUCTOR
+    ~Vector()
+    {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    void pushBack(const T &value) //Agrega un elemento al final del vector
+    {
+        if (size == capacity) //Si size == capacity, duplica la capacidad (resize(capacity * 2)).
+        {
+            resize(capacity * 2);
+        }
+        items[size++] = value;
+    }
+
+    T at(int index) const //Retorna el elemento en la posición index.
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value.
+    void set(int index, T value)
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector.
+    int getSize() const
+    {
+        return size;
+    }
+
+    int getCapacity() const
+    {
+        return capacity;
+    }
+
+    void resize(int newCapacity)
+    {
+        if (newCapacity <= capacity)
+            return;
+
+        T *newItems = new T[newCapacity];//arreglo dinamico
+        for (int i = 0; i < size; i++)
+        {
+            newItems[i] = items[i];
+        }
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+};
+
+#endif // VECTOR_H
+
+CODIGO: 
+#include "Vector.h"
+#include <iostream>
+#include <algorithm>
+#include <map>
+
+using namespace std;
+
+class MathVector: public Vector<int> {
+public:
+    MathVector() : Vector<int>(5) {
+        pushBack(10);
+        pushBack(9);
+        pushBack(8);
+        pushBack(10);
+        pushBack(10);
+    }
+
+    double promedio() {
+        if (size == 0) {
+            throw runtime_error("El vector está vacío");
+        }
+
+        int suma = 0;
+        for (int i = 0; i < size; i++) {
+            suma += items[i];
+        }
+        return (1.0 * suma) / size;
+    }
+
+    double calcularMediana() {
+        if (size == 0) {
+            throw runtime_error("El vector está vacío");
+        }
+
+        int* copia = new int[size];
+        for (int i = 0; i < size; i++) {
+            copia[i] = items[i];
+        }
+
+        sort(copia, copia + size);
+
+        double mediana;
+        if (size % 2 != 0) {
+            mediana = copia[size / 2];
+        } else {
+            mediana = (copia[size / 2 - 1] + copia[size / 2]) / 2.0;
+        }
+
+        delete[] copia;
+        return mediana;
+    }
+
+    int calcularModa() {
+        if (size == 0) {
+            throw runtime_error("El vector está vacío");
+        }
+
+        map<int, int> frecuencia;
+        int maxFrecuencia = 0;
+        int moda = items[0];
+
+        for (int i = 0; i < size; i++) {
+            frecuencia[items[i]]++;
+            if (frecuencia[items[i]] > maxFrecuencia) {
+                maxFrecuencia = frecuencia[items[i]];
+                moda = items[i];
+            }
+        }
+        return moda;
+    }
+
+    int maximo() {
+        if (size == 0) {
+            throw runtime_error("El vector está vacío");
+        }
+
+        int maxValor = items[0];
+        for (int i = 1; i < size; i++) {
+            if (items[i] > maxValor) {
+                maxValor = items[i];
+            }
+        }
+        return maxValor;
+    }
+
+    int minimo() {
+        if (size == 0) {
+            throw runtime_error("El vector está vacío");
+        }
+
+        int minValor = items[0];
+        for (int i = 1; i < size; i++) {
+            if (items[i] < minValor) {
+                minValor = items[i];
+            }
+        }
+        return minValor;
+    }
+};
+
+int main() {
+    MathVector vector;
+
+    cout << "Valores fijos del vector: 10, 9, 8, 9, 9" << endl;
+    cout << "Promedio: " << vector.promedio() << endl;
+    cout << "Mediana: " << vector.calcularMediana() << endl;
+    cout << "Moda: " << vector.calcularModa() << endl;
+    cout << "Máximo: " << vector.maximo() << endl;
+    cout << "Mínimo: " << vector.minimo() << endl;
+
+    return 0;
+}
