@@ -1,0 +1,211 @@
+LIBRERIA:
+#ifndef MATRIZ_H
+#define MATRIZ_H
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+template <typename T, int ROWS, int COLS>
+class Matrix {
+  protected:
+    T m[ROWS][COLS];
+
+  public:
+    Matrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                m[i][j] = T();
+            }
+        }
+    }
+
+    T at(int row, int col) const
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return m[row][col];
+    }
+
+    void set(int row, int col, T value)
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        m[row][col] = value;
+    }
+
+    int numRows() const
+    {
+        return ROWS;
+    }
+    int numCols() const
+    {
+        return COLS;
+    }
+
+    void print() const
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout << m[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+#endif
+
+CODIGO: 
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+#include <algorithm>
+#include "Matrix.h"
+using namespace std;
+
+class Producto {
+private:
+    int id;
+    string nombre;
+    float precio;
+    int cantidadEnStock;
+
+public:
+    Producto(int id, string nombre, float precio, int cantidad)
+        : id(id), nombre(nombre), precio(precio), cantidadEnStock(cantidad) {}
+
+    int getId() const { return id; }
+    string getNombre() const { return nombre; }
+    float getPrecio() const { return precio; }
+    int getCantidadEnStock() const { return cantidadEnStock; }
+
+    void setCantidadEnStock(int cantidad) { cantidadEnStock = cantidad; }
+
+    void imprimirProducto() const {
+        cout << "ID: " << id << ", Nombre: " << nombre << ", Precio: " << precio << " Bs, Cantidad en stock: " << cantidadEnStock << endl;
+    }
+};
+
+template <int FILAS, int COLUMNAS>
+class Almacen {
+private:
+    Matrix<Producto*, FILAS, COLUMNAS> matriz;
+
+public:
+    void agregarProducto(int fila, int columna, Producto* producto) {
+        if (fila >= 0 && fila < FILAS && columna >= 0 && columna < COLUMNAS) {
+            matriz.set(fila, columna, producto);
+        }
+    }
+
+    void eliminarProducto(int fila, int columna) {
+        if (fila >= 0 && fila < FILAS && columna >= 0 && columna < COLUMNAS) {
+            matriz.set(fila, columna, nullptr);
+        }
+    }
+
+    Producto* buscarPorNombre(const string& nombre) {
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                Producto* p = matriz.at(i, j);
+                if (p != nullptr && p->getNombre() == nombre) {
+                    return p;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    void ordenarPorPrecio() {
+        vector<Producto*> productos;
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                Producto* p = matriz.at(i, j);
+                if (p != nullptr) {
+                    productos.push_back(p);
+                }
+            }
+        }
+
+        sort(productos.begin(), productos.end(), [](Producto* p1, Producto* p2) {
+            return p1->getPrecio() < p2->getPrecio();
+        });
+
+        int k = 0;
+        for (int i = 0; i < FILAS && k < productos.size(); i++) {
+            for (int j = 0; j < COLUMNAS && k < productos.size(); j++) {
+                matriz.set(i, j, productos[k]);
+                k++;
+            }
+        }
+    }
+
+    int calcularTotalPorCategoria(int fila) {
+        int total = 0;
+        for (int col = 0; col < COLUMNAS; col++) {
+            Producto* producto = matriz.at(fila, col);
+            if (producto != nullptr) {
+                total += producto->getCantidadEnStock();
+            }
+        }
+        return total;
+    }
+
+    void imprimirAlmacen() const {
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                Producto* p = matriz.at(i, j);
+                if (p != nullptr) {
+                    p->imprimirProducto();
+                }
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    Producto p1(1, "Rimel", 110, 45);
+    Producto p2(2, "Corrector", 85, 30);
+    Producto p3(3, "Rubor", 55, 46);
+
+    Almacen<2, 3> almacen;
+
+    almacen.agregarProducto(0, 0, &p1);
+    almacen.agregarProducto(0, 1, &p2);
+    almacen.agregarProducto(1, 0, &p3);
+
+    cout << "Inventario actual:\n";
+    almacen.imprimirAlmacen();
+
+    string nombreBuscar = "Corrector";
+    Producto* pEncontrado = almacen.buscarPorNombre(nombreBuscar);
+    if (pEncontrado) {
+        cout << "\nProducto encontrado:\n";
+        pEncontrado->imprimirProducto();
+    } else {
+        cout << "\nProducto no encontrado.\n";
+    }
+
+    almacen.ordenarPorPrecio();
+    cout << "\nInventario después de ordenar por precio:\n";
+    almacen.imprimirAlmacen();
+
+    almacen.eliminarProducto(0, 0);  // Eliminar el Rimel
+    cout << "\nInventario después de eliminar el Rimel:\n";
+    almacen.imprimirAlmacen();
+
+    int totalCategoria1 = almacen.calcularTotalPorCategoria(0);
+    cout << "\nTotal de productos en la categoría 0: " << totalCategoria1 << endl;
+
+    return 0;
+}
