@@ -1,0 +1,170 @@
+LIBRERIA: 
+//directivas de preprocesador y evitan que el archivo se incluya más de una vez en un mismo programa.
+#ifndef VECTOR_H //Verifica si no se ha definido VECTOR_H antes.
+#define VECTOR_H //Lo define para que no se vuelva a incluir.
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T> class Vector { //T es un tipo genérico que será reemplazado con un tipo específico cuando se cree un objeto Vector<int>, Vector<double>, etc.
+  protected:
+    T *items; //Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; //numero actual de los elementos almacenados.
+    int capacity; //tamaño máximo que puede almacenar.
+
+
+//CONSTRUCTOR DE LA CLASE
+  public:
+    Vector(int _capacity = 10) : size(0), capacity(_capacity)
+    {
+        items = new T[capacity]; //Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+//DESTRUCTOR
+    ~Vector()
+    {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    void pushBack(const T &value) //Agrega un elemento al final del vector
+    {
+        if (size == capacity) //Si size == capacity, duplica la capacidad (resize(capacity * 2)).
+        {
+            resize(capacity * 2);
+        }
+        items[size++] = value;
+    }
+
+    T at(int index) const //Retorna el elemento en la posición index.
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value.
+    void set(int index, T value)
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector.
+    int getSize() const
+    {
+        return size;
+    }
+
+    int getCapacity() const
+    {
+        return capacity;
+    }
+
+    void resize(int newCapacity)
+    {
+        if (newCapacity <= capacity)
+            return;
+
+        T *newItems = new T[newCapacity];//arreglo dinamico
+        for (int i = 0; i < size; i++)
+        {
+            newItems[i] = items[i];
+        }
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+};
+
+#endif // VECTOR_H
+
+CODIGO: 
+#include "Vector.h"
+#include <iostream>
+
+using namespace std;
+
+class VectorCalculator {
+public:
+    static Vector<int> suma(const Vector<int> &v1, const Vector<int> &v2) {
+        if (v1.getSize()!=v2.getSize()) {
+            throw runtime_error("Los vectores deben tener el mismo tamaño");
+        }
+
+        Vector<int> resultado(v1.getSize());
+        for (int i=0; i<v1.getSize(); i++) {
+            resultado.pushBack(v1.at(i)+v2.at(i));
+        }
+        return resultado;
+    }
+
+    static Vector<int> resta(const Vector<int> &v1, const Vector<int> &v2) {
+        if (v1.getSize()!=v2.getSize()) {
+            throw runtime_error("Los vectores deben tener el mismo tamaño");
+        }
+
+        Vector<int> resultado(v1.getSize());
+        for (int i=0; i<v1.getSize(); i++) {
+            resultado.pushBack(v1.at(i) - v2.at(i));
+        }
+        return resultado;
+    }
+
+    static Vector<int> multiplicacion(const Vector<int> &v1, const Vector<int> &v2) {
+        if (v1.getSize()!=v2.getSize()) {
+            throw runtime_error("Los vectores deben tener el mismo tamaño");
+        }
+
+        Vector<int> resultado(v1.getSize());
+        for (int i=0; i<v1.getSize(); i++) {
+            resultado.pushBack(v1.at(i) * v2.at(i));
+        }
+        return resultado;
+    }
+};
+
+int main() {
+    Vector<int> v1, v2;
+
+    for (int i=0; i<1; i++) { //si cambio el 1 la matriz va crecer y los valores se van a repetir la cantidad de veces del número
+        v1.pushBack(3);
+        v1.pushBack(2);
+        v1.pushBack(1);
+        v2.pushBack(2);
+        v2.pushBack(5);
+        v2.pushBack(2);
+    }
+
+    try { //lo usamos para manejar excepciones cuaando algun error puede ocurrir dentro del programa, cada uno tiene un (throw)
+        Vector<int> sumaRes=VectorCalculator::suma(v1, v2);
+        Vector<int> restaRes=VectorCalculator::resta(v1, v2);
+        Vector<int> multRes=VectorCalculator::multiplicacion(v1, v2);
+
+        cout << "Suma: ";
+        sumaRes.print();
+        cout << "Resta: ";
+        restaRes.print();
+        cout << "Multiplicacion: ";
+        multRes.print();
+    } catch (runtime_error &e) { //Si ocurre un error dentro del try, el programa busca un catch que lo pueda manejar
+        cout << "Error: " << e.what() << endl; //devuelve el mensaje
+    }
+
+    return 0;
+}
