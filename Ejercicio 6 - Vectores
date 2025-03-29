@@ -1,0 +1,217 @@
+LIBRERIA:
+#ifndef VECTOR_H
+#define VECTOR_H
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T>
+class Vector {
+protected:
+    T *items; // Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; // Número actual de los elementos almacenados.
+    int capacity; // Tamaño máximo que puede almacenar.
+
+public:
+    // Constructor de la clase
+    Vector(int _capacity = 10) : size(0), capacity(_capacity) {
+        if (_capacity <= 0) {
+            throw invalid_argument("La capacidad debe ser mayor que 0");
+        }
+        items = new T[capacity]; // Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+    // Destructor
+    ~Vector() {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    // Agrega un elemento al final del vector
+    void pushBack(const T &value) {
+        if (size == capacity) { // Si size == capacity, duplica la capacidad (resize(capacity * 2)).
+            resize(capacity * 2);
+        }
+        items[size++] = value;
+    }
+
+    // Retorna el elemento en la posición index.
+    T at(int index) const {
+        if (index < 0 || index >= size) {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value.
+    void set(int index, T value) {
+        if (index < 0 || index >= size) {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector.
+    int getSize() const {
+        return size;
+    }
+
+    int getCapacity() const {
+        return capacity;
+    }
+
+    // Cambia la capacidad del vector
+    void resize(int newCapacity) {
+        if (newCapacity <= capacity) {
+            return;
+        }
+
+        T *newItems = new T[newCapacity]; // Arreglo dinámico
+        if (!newItems) { // Verificación de error de memoria
+            throw bad_alloc();
+        }
+
+        for (int i = 0; i < size; i++) {
+            newItems[i] = items[i];
+        }
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+    }
+
+    // Imprime todos los elementos del vector
+    void print() const {
+        if (size == 0) {
+            cout << "El vector está vacío." << endl;
+            return;
+        }
+
+        for (int i = 0; i < size; i++) {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+
+    // Método para eliminar un elemento por su índice
+    void remove(int index) {
+        if (index < 0 || index >= size) {
+            throw out_of_range("Índice fuera de rango");
+        }
+
+        // Desplaza los elementos hacia la izquierda
+        for (int i = index; i < size - 1; i++) {
+            items[i] = items[i + 1];
+        }
+
+        size--; // Disminuye el tamaño del vector
+    }
+
+    // Método para eliminar todos los elementos
+    void clear() {
+        size = 0;
+    }
+};
+
+#endif // VECTOR_H
+
+CODIGO:
+#include "Vector.h"
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Producto {
+public:
+    int id;
+    string nombre;
+    double precio;
+    int stock;
+
+    Producto(int _id = 0, string _nombre = "", double _precio = 0, int _stock = 0)
+        : id(_id), nombre(_nombre), precio(_precio), stock(_stock) {}
+
+    void print() const {
+        cout << "ID: " << id << ", Nombre: " << nombre << ", Precio: " << precio << " Bs, Cantidad en stock: " << stock << endl;
+    }
+};
+
+class Inventario {
+private:
+    Vector<Producto> productos;
+
+public:
+    void agregarProducto(int id, string nombre, double precio, int stock) {
+        productos.pushBack(Producto(id, nombre, precio, stock));
+    }
+
+    void eliminarProducto(int id) {
+        Vector<Producto> temp;
+        for (int i = 0; i < productos.getSize(); i++) {
+            if (productos.at(i).id != id) {
+                temp.pushBack(productos.at(i));
+            }
+        }
+        productos = temp;
+    }
+
+    void buscarProducto(string nombre) {
+        bool encontrado = false;
+        for (int i = 0; i < productos.getSize(); i++) {
+            if (productos.at(i).nombre == nombre) {
+                productos.at(i).print();
+                encontrado = true;
+            }
+        }
+        if (!encontrado) {
+            cout << "Producto no encontrado." << endl;
+        }
+    }
+
+    void ordenarPorPrecio() {
+        for (int i = 0; i < productos.getSize() - 1; i++) {
+            for (int j = 0; j < productos.getSize() - i - 1; j++) {
+                if (productos.at(j).precio > productos.at(j + 1).precio) {
+                    Producto temp = productos.at(j);
+                    productos.set(j, productos.at(j + 1));
+                    productos.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
+    void mostrarInventario() {
+        for (int i = 0; i < productos.getSize(); i++) {
+            productos.at(i).print();
+        }
+    }
+};
+
+int main() {
+    Inventario inventario;
+
+    inventario.agregarProducto(1, "Rimel", 110, 45);
+    inventario.agregarProducto(2, "Corrector", 85, 30);
+    inventario.agregarProducto(3, "Rubor", 55, 46);
+
+    cout << "Inventario inicial:" << endl;
+    inventario.mostrarInventario();
+
+    inventario.agregarProducto(4, "Labial", 75, 20);
+    cout << "\nInventario despues de agregar un nuevo producto:" << endl;
+    inventario.mostrarInventario();
+
+    inventario.eliminarProducto(2);
+    cout << "\nInventario despues de eliminar Corrector:" << endl;
+    inventario.mostrarInventario();
+
+    cout << "\nBuscando el producto 'Rubor':" << endl;
+    inventario.buscarProducto("Rubor");
+
+    inventario.ordenarPorPrecio();
+    cout << "\nInventario ordenado por precio:" << endl;
+    inventario.mostrarInventario();
+
+    return 0;
+}
