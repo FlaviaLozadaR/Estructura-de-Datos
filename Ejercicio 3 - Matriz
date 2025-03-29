@@ -1,0 +1,127 @@
+LIBRERIA:
+#ifndef MATRIZ_H
+#define MATRIZ_H
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+template <typename T, int ROWS, int COLS>
+class Matrix {
+  protected:
+    T m[ROWS][COLS];
+
+  public:
+    Matrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                m[i][j] = T();
+            }
+        }
+    }
+
+    T at(int row, int col) const
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return m[row][col];
+    }
+
+    void set(int row, int col, T value)
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        m[row][col] = value;
+    }
+
+    int numRows() const
+    {
+        return ROWS;
+    }
+    int numCols() const
+    {
+        return COLS;
+    }
+
+    void print() const
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout << m[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+#endif
+
+CODIGO: 
+#include <iostream>
+#include <stdexcept>
+#include "Matrix.h"
+
+using namespace std;
+
+template <int TAMANO>
+class MathMatrix : public Matrix<int, TAMANO, TAMANO>
+{
+  public:
+    bool esSimetrica() const
+    {
+        for (int i=0; i<TAMANO; i++)
+        {
+            for (int j=0; j<TAMANO; j++)
+            {
+                if (this->m[i][j]!=this->m[j][i])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+
+int main()
+{
+    MathMatrix<3> matrizSimetrica;
+    int valoresSimetricos[3][3]={{1, 2, 3}, {2, 5, 6}, {3, 6, 9}};
+
+    for (int i=0; i<3; i++)
+    {
+        for (int j=0; j<3; j++)
+        {
+            matrizSimetrica.set(i, j, valoresSimetricos[i][j]);
+        }
+    }
+
+    MathMatrix<3> matrizNoSimetrica;
+    int valoresNoSimetricos[3][3] = {{1, 4, 7}, {2, 5, 8}, {3, 6, 9}};
+
+    for (int i=0; i<3; i++)
+    {
+        for (int j=0; j<3; j++)
+        {
+            matrizNoSimetrica.set(i, j, valoresNoSimetricos[i][j]);
+        }
+    }
+
+    cout<<"Matriz Simétrica:" <<endl;
+    matrizSimetrica.print();
+    cout << (matrizSimetrica.esSimetrica() ? "Es simétrica" : "No es simétrica") <<endl;
+
+    cout<<"\nMatriz No Simétrica:" << endl;
+    matrizNoSimetrica.print();
+    cout<<(matrizNoSimetrica.esSimetrica() ? "Es simétrica" : "No es simétrica") <<endl;
+
+    return 0;
+}
