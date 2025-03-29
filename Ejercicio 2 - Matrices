@@ -1,0 +1,207 @@
+LIBRERIAS USADAS:
+//directivas de preprocesador y evitan que el archivo se incluya más de una vez en un mismo programa.
+#ifndef VECTOR_H //Verifica si no se ha definido VECTOR_H antes.
+#define VECTOR_H //Lo define para que no se vuelva a incluir.
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T> class Vector { //T es un tipo genérico que será reemplazado con un tipo específico cuando se cree un objeto Vector<int>, Vector<double>, etc.
+  protected:
+    T *items; //Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; //numero actual de los elementos almacenados.
+    int capacity; //tamaño máximo que puede almacenar.
+
+
+//CONSTRUCTOR DE LA CLASE
+  public:
+    Vector(int _capacity = 10) : size(0), capacity(_capacity)
+    {
+        items = new T[capacity]; //Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+//DESTRUCTOR
+    ~Vector()
+    {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    void pushBack(const T &value) //Agrega un elemento al final del vector
+    {
+        if (size == capacity) //Si size == capacity, duplica la capacidad (resize(capacity * 2)).
+        {
+            resize(capacity * 2);
+        }
+        items[size++] = value;
+    }
+
+    T at(int index) const //Retorna el elemento en la posición index.
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value.
+    void set(int index, T value)
+    {
+        if (index < 0 || index >= size)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector.
+    int getSize() const
+    {
+        return size;
+    }
+
+    int getCapacity() const
+    {
+        return capacity;
+    }
+
+    void resize(int newCapacity)
+    {
+        if (newCapacity <= capacity)
+            return;
+
+        T *newItems = new T[newCapacity];//arreglo dinamico
+        for (int i = 0; i < size; i++)
+        {
+            newItems[i] = items[i];
+        }
+        delete[] items;
+        items = newItems;
+        capacity = newCapacity;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+};
+
+#endif // VECTOR_H
+
+#ifndef MATRIZ_H
+#define MATRIZ_H
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+template <typename T, int ROWS, int COLS>
+class Matrix {
+  protected:
+    T m[ROWS][COLS];
+
+  public:
+    Matrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                m[i][j] = T();
+            }
+        }
+    }
+
+    T at(int row, int col) const
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return m[row][col];
+    }
+
+    void set(int row, int col, T value)
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        m[row][col] = value;
+    }
+
+    int numRows() const
+    {
+        return ROWS;
+    }
+    int numCols() const
+    {
+        return COLS;
+    }
+
+    void print() const
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout << m[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+#endif
+
+CODIGO:
+#include <iostream>
+#include <stdexcept>
+#include "Matrix.h"
+#include <vector>
+using namespace std;
+
+vector<int> sumarFilas(const Matrix<int, 3, 4>& matriz)
+{
+    vector<int> sumasFilas(matriz.numRows(), 0);
+    for (int i=0; i<matriz.numRows(); i++)
+    {
+        for (int j=0; j<matriz.numCols(); j++)
+        {
+            sumasFilas[i]+=matriz.at(i, j);
+        }
+    }
+    return sumasFilas;
+}
+
+int main()
+{
+    Matrix<int, 3, 4> matriz;
+
+    int valor=1;
+    for (int i=0; i<matriz.numRows(); i++)
+    {
+        for (int j=0; j<matriz.numCols(); j++)
+        {
+            matriz.set(i,j,valor++);
+        }
+    }
+
+    cout<<"Matriz:" <<endl;
+    matriz.print();
+
+    vector<int> sumasFilas=sumarFilas(matriz);
+    cout<<"Suma de cada fila:"<<endl;
+    for (size_t i=0; i<sumasFilas.size();i++)
+    {
+        cout<<"Fila " <<i<<": "<<sumasFilas[i]<<endl;
+    }
+
+    return 0;
+}
+
