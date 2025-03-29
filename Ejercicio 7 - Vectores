@@ -1,0 +1,209 @@
+LIBRERIA:
+#ifndef VECTOR_H //Verifica si no se ha definido VECTOR_H antes.
+#define VECTOR_H //Lo define para que no se vuelva a incluir.
+
+#include <iostream>
+#include <stdexcept> //Permite lanzar excepciones (throw out_of_range) cuando se accede a un índice inválido.
+
+using namespace std;
+
+template <typename T> class Vector { //T es un tipo genérico que será reemplazado con un tipo específico cuando se cree un objeto Vector<int>, Vector<double>, etc.
+  protected:
+    T *items; //Un puntero a un arreglo dinámico que almacena los elementos del vector.
+    int size; //numero actual de los elementos almacenados.
+    int capacity; //tamaño máximo que puede almacenar.
+
+  public:
+    // CONSTRUCTOR DE LA CLASE
+    Vector(int _capacity = 10) : size(0), capacity(_capacity)
+    {
+        items = new T[capacity]; // Crea un arreglo dinámico para almacenar los elementos.
+    }
+
+    // CONSTRUCTOR DE COPIA
+    Vector(const Vector<T>& other) : size(other.size), capacity(other.capacity)
+    {
+        items = new T[capacity]; // Asigna nueva memoria
+        for (int i = 0; i < size; i++) {
+            items[i] = other.items[i]; // Copia los elementos
+        }
+    }
+
+    // OPERADOR DE ASIGNACIÓN
+    Vector<T>& operator=(const Vector<T>& other)
+    {
+        if (this == &other) {
+            return *this; // Evitar auto-asignación
+        }
+
+        delete[] items; // Libera la memoria previa
+
+        size = other.size;
+        capacity = other.capacity;
+        items = new T[capacity]; // Asigna nueva memoria
+
+        for (int i = 0; i < size; i++) {
+            items[i] = other.items[i]; // Copia los elementos
+        }
+
+        return *this;
+    }
+
+    // DESTRUCTOR
+    ~Vector()
+    {
+        delete[] items; // Libera la memoria reservada por new, evitando fugas de memoria
+    }
+
+    // Agrega un elemento al final del vector
+    void pushBack(const T& value)
+    {
+        if (size == capacity) {
+            resize(capacity * 2); // Si el vector está lleno, aumenta su capacidad
+        }
+        items[size++] = value; // Asigna el valor al final y aumenta el tamaño
+    }
+
+    // Retorna el elemento en la posición index
+    T at(int index) const
+    {
+        if (index < 0 || index >= size) {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return items[index];
+    }
+
+    // Modifica el elemento en index con value
+    void set(int index, T value)
+    {
+        if (index < 0 || index >= size) {
+            throw out_of_range("Índice fuera de rango");
+        }
+        items[index] = value;
+    }
+
+    // Devuelven el número de elementos (size) y la capacidad (capacity) del vector
+    int getSize() const
+    {
+        return size;
+    }
+
+    int getCapacity() const
+    {
+        return capacity;
+    }
+
+    // Cambia el tamaño del vector
+    void resize(int newCapacity)
+    {
+        if (newCapacity <= capacity)
+            return;
+
+        T* newItems = new T[newCapacity]; // Crea un nuevo arreglo dinámico
+        for (int i = 0; i < size; i++) {
+            newItems[i] = items[i]; // Copia los elementos
+        }
+        delete[] items; // Libera la memoria previa
+        items = newItems; // Asigna la nueva memoria
+        capacity = newCapacity; // Actualiza la capacidad
+    }
+
+    // Imprime los elementos del vector
+    void print()
+    {
+        for (int i = 0; i < size; i++) {
+            cout << items[i] << " | ";
+        }
+        cout << endl;
+    }
+};
+
+#endif // VECTOR_H
+
+CODIGO: 
+#include <iostream>
+#include "Vector.h"
+
+using namespace std;
+
+class Estudiante {
+private:
+    string registro;
+    string nombre;
+    Vector<double> calificaciones;
+
+public:
+    Estudiante() : registro(""), nombre(""), calificaciones() {}
+
+    Estudiante(string _registro, string _nombre, Vector<double> _calificaciones) : registro(_registro), nombre(_nombre), calificaciones(_calificaciones) {}
+
+    double calcularPromedio() const {
+        if (calificaciones.getSize()==0) return 0;
+        double suma=0;
+        for (int i=0; i<calificaciones.getSize(); i++) {
+            suma+=calificaciones.at(i);
+        }
+        return suma/calificaciones.getSize();
+    }
+
+    void mostrarDatos() const {
+        cout<< "Registro: "<<registro<< ", Nombre: "<<nombre<< ", Calificaciones: ";
+        for (int i=0; i < calificaciones.getSize(); i++) {
+            cout<<"Parcial "<< (i + 1) <<": "<<calificaciones.at(i) << ", ";
+        }
+        cout<< "Promedio: " <<calcularPromedio() <<endl;
+    }
+
+    double getPromedio() const {
+        return calcularPromedio();
+    }
+};
+
+class GestionAcademica {
+private:
+    Vector<Estudiante> estudiantes;
+
+public:
+    void agregarEstudiante(const Estudiante &estudiante) {
+        estudiantes.pushBack(estudiante);
+    }
+
+    void mostrarEstudiantes() const {
+        for (int i=0; i<estudiantes.getSize(); i++) {
+            estudiantes.at(i).mostrarDatos();
+        }
+    }
+
+    double calcularPromedioGeneral() const {
+        if (estudiantes.getSize()==0) return 0; // Evitar división por cero
+        double sumaTotal=0;
+        for (int i=0; i<estudiantes.getSize(); i++) {
+            sumaTotal+=estudiantes.at(i).getPromedio();
+        }
+        return sumaTotal/estudiantes.getSize();
+    }
+};
+
+int main() {
+    GestionAcademica gestion;
+
+    Vector<double> calif1; calif1.pushBack(100); calif1.pushBack(95); calif1.pushBack(100);
+    Vector<double> calif2; calif2.pushBack(100); calif2.pushBack(90); calif2.pushBack(100);
+    Vector<double> calif3; calif3.pushBack(90); calif3.pushBack(100); calif3.pushBack(100);
+    Vector<double> calif4; calif4.pushBack(90); calif4.pushBack(95); calif4.pushBack(100);
+    Vector<double> calif5; calif5.pushBack(90); calif5.pushBack(90); calif5.pushBack(95);
+    Vector<double> calif6; calif6.pushBack(90); calif6.pushBack(95); calif6.pushBack(95);
+
+    gestion.agregarEstudiante(Estudiante("2024112463", "Flavia Lozada Rueda", calif1));
+    gestion.agregarEstudiante(Estudiante("2024122454", "Maria Fernanda Sanchez Arauz", calif2));
+    gestion.agregarEstudiante(Estudiante("2024122588", "Mariana Parada", calif3));
+    gestion.agregarEstudiante(Estudiante("2024126318", "Nadia Martinez", calif4));
+    gestion.agregarEstudiante(Estudiante("2024123365", "Ana Camila Lopez", calif5));
+    gestion.agregarEstudiante(Estudiante("2024223266", "Abigail Osinaga", calif6));
+
+    gestion.mostrarEstudiantes();
+
+    cout<<"Promedio general del grupo: "<<gestion.calcularPromedioGeneral()<<endl;
+
+    return 0;
+}
