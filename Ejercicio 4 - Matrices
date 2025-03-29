@@ -1,0 +1,146 @@
+LIBRERIA:
+#ifndef MATRIZ_H
+#define MATRIZ_H
+
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+template <typename T, int ROWS, int COLS>
+class Matrix {
+  protected:
+    T m[ROWS][COLS];
+
+  public:
+    Matrix()
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                m[i][j] = T();
+            }
+        }
+    }
+
+    T at(int row, int col) const
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        return m[row][col];
+    }
+
+    void set(int row, int col, T value)
+    {
+        if (row < 0 || row >= ROWS || col < 0 || col >= COLS)
+        {
+            throw out_of_range("Índice fuera de rango");
+        }
+        m[row][col] = value;
+    }
+
+    int numRows() const
+    {
+        return ROWS;
+    }
+    int numCols() const
+    {
+        return COLS;
+    }
+
+    void print() const
+    {
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout << m[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+#endif
+
+CODIGO:
+#include <iostream>
+#include <stdexcept>
+#include "Matrix.h"
+#include <vector>
+using namespace std;
+
+template <int FILAS, int COLUMNAS>
+class MathMatrix : public Matrix<int, FILAS, COLUMNAS>
+{
+  public:
+    int encontrarMaximo() const
+    {
+        int maximo=this->at(0, 0);
+        for (int i=0; i<FILAS; i++)
+        {
+            for (int j=0; j<COLUMNAS; j++)
+            {
+                if (this->at(i, j)>maximo)
+                {
+                    maximo=this->at(i, j);
+                }
+            }
+        }
+        return maximo;
+    }
+
+    int encontrarMinimo() const
+    {
+        int minimo= this->at(0, 0);
+        for (int i=0; i<FILAS; i++)
+        {
+            for (int j=0;  j<COLUMNAS; j++)
+            {
+                if (this->at(i, j) < minimo)
+                {
+                    minimo=this->at(i, j);
+                }
+            }
+        }
+        return minimo;
+    }
+
+    double calcularPromedio() const
+    {
+        int suma=0;
+        int totalElementos=FILAS*COLUMNAS;
+        for (int i=0; i<FILAS; i++)
+        {
+            for (int j=0; j<COLUMNAS; j++)
+            {
+                suma+=this->at(i, j);
+            }
+        }
+        return static_cast<double>(suma) / totalElementos;
+    }
+};
+
+int main()
+{
+    MathMatrix<3, 4> matriz;
+
+    int valor=1;
+    for (int i=0; i<matriz.numRows(); i++)
+    {
+        for (int j=0; j<matriz.numCols(); j++)
+        {
+            matriz.set(i, j, valor++);
+        }
+    }
+
+    cout<< "Matriz:" <<endl;
+    matriz.print();
+
+    cout<<"\nMáximo: "<<matriz.encontrarMaximo()<<endl;
+    cout<<"Mínimo: " <<matriz.encontrarMinimo()<<endl;
+    cout<<"Promedio: "<<matriz.calcularPromedio()<<endl;
+
+    return 0;
+}
