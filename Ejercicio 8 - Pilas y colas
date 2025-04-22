@@ -1,0 +1,165 @@
+#include <iostream>
+#include <string>
+#include "Stack.h"
+
+using namespace std;
+
+struct Accion {
+    string tipo;
+    string contenido;
+
+    friend ostream& operator<<(ostream& os, const Accion& a) {
+        os<<"["<< a.tipo<<"] \""<<a.contenido<< "\"";
+        return os;
+    }
+};
+
+class EditorTexto {
+private:
+    Stack<Accion> historial;
+
+public:
+    void realizarAccion(const string& tipo, const string& contenido) {
+        Accion accion={tipo, contenido};
+        historial.push(accion);
+        cout<< "Acción realizada: "<<accion<<endl;
+    }
+
+    void deshacerAccion() {
+        if (historial.isEmpty()) {
+            cout<<"No hay acciones para deshacer." <<endl;
+            return;
+        }
+
+        Accion ultima;
+        historial.pop(ultima);
+        cout<< "Acción deshecha: "<<ultima<<endl;
+    }
+
+    void mostrarHistorial() const {
+        cout<<"Historial de acciones:" <<endl;
+        historial.print();
+    }
+};
+
+int main() {
+    EditorTexto editor;
+    int opcion;
+
+    do {
+        cout<<"--Editor de Texto ---"<<endl;
+        cout<<"----------------------"<<endl; 
+        cout<<"1. Escribir texto"<<endl;
+        cout<<"2. Borrar texto"<<endl;
+        cout<<"3. Copiar texto"<<endl;
+        cout<<"4. Pegar texto"<<endl;
+        cout<<"5. Deshacer última acción"<<endl;
+        cout<<"6. Mostrar historial de acciones"<<endl;
+        cout<<"7. Salir" << endl;
+        cout<<"Ingrese una opción: ";
+        cin>>opcion;
+        cin.ignore();
+
+        if (opcion>=1 && opcion<=4) {
+            string contenido;
+            cout<<"Ingrese el contenido: ";
+            getline(cin, contenido);
+
+            switch (opcion) {
+                case 1:editor.realizarAccion("escribir", contenido); break;
+                case 2:editor.realizarAccion("borrar", contenido); break;
+                case 3:editor.realizarAccion("copiar", contenido); break;
+                case 4:editor.realizarAccion("pegar", contenido); break;
+            }
+        } else if (opcion==5) {
+            editor.deshacerAccion();
+        } else if (opcion==6) {
+            editor.mostrarHistorial();
+        } else if (opcion!=7) {
+            cout<<"Opción no válida."<<endl;
+        }
+
+    } while (opcion != 7);
+    cout<<"Saliendo del editor"<<endl;
+    return 0;
+}
+
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
