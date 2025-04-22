@@ -1,0 +1,177 @@
+#include "Stack.h"
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct Paquete {
+    int id;
+    string tipo;
+
+    friend ostream &operator<<(ostream &os, const Paquete &p) {
+        os<<"[ID: " << p.id << ",Tipo: "<<p.tipo<<"]";
+        return os;
+    }
+};
+
+class Almacen {
+private:
+    Stack<Paquete> entrada;
+    Stack<Paquete> salida;
+
+public:
+    void recibirPaquete(const Paquete &p) {
+        entrada.push(p);
+        cout<<"Paquete recibido: " << p<<endl;
+    }
+
+    void retirarPaquete() {
+        if (salida.isEmpty()) {
+            Paquete temp;
+            while (!entrada.isEmpty()) {
+                entrada.pop(temp);
+                salida.push(temp);
+            }
+        }
+
+        Paquete p;
+        if (salida.pop(p)) {
+            cout<<"Paquete retirado: " <<p<<endl;
+        } else {
+            cout<<"No hay paquetes para retirar."<<endl;
+        }
+    }
+
+    void mostrarEstado() {
+        cout<<"Contenido del almacén:"<<endl;
+
+        Stack<Paquete> tempSalida = salida;
+        Stack<Paquete> tempEntrada=entrada;
+
+        while (!tempSalida.isEmpty()) {
+            Paquete p;
+            tempSalida.pop(p);
+            cout<<p<<endl;
+        }
+
+        while (!tempEntrada.isEmpty()) {
+            Paquete p;
+            tempEntrada.pop(p);
+            cout<<p <<endl;
+        }
+    }
+};
+
+int main() {
+    Almacen almacen;
+    int opcion;
+    int idCounter=1;
+
+    do {
+        cout<< "--- Menú de Gestión de Inventario ---" <<endl;
+        cout<<"......................................."<<endl;
+
+        cout<<"1. Recibir paquete"<<endl;
+        cout<<"2. Retirar paquete"<<endl;
+        cout<<"3. Mostrar estado del almacén"<<endl;
+        cout<<"4. Salir"<<endl;
+        cout<<"Ingrese una opción: ";
+        cin>> opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Paquete p;
+            p.id=idCounter++;
+            cout<<"Ingrese tipo de prenda: ";
+            getline(cin, p.tipo);
+            almacen.recibirPaquete(p);
+        } else if (opcion==2) {
+            almacen.retirarPaquete();
+        } else if (opcion==3) {
+            almacen.mostrarEstado();
+        }
+
+    } while (opcion != 4);
+
+    return 0;
+}
+
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
