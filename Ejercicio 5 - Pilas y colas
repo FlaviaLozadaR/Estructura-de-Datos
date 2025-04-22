@@ -1,0 +1,153 @@
+#include <iostream>
+#include <string>
+#include "Stack.h"
+
+using namespace std;
+
+struct Plato {
+    int id;
+    string tipo;
+
+    friend ostream& operator<<(ostream& os, const Plato& p) {
+        os<<"ID: "<< p.id<<", Tipo: "<< p.tipo;
+        return os;
+    }
+};
+
+class Lavaplatos {
+private:
+    Stack<Plato> pilaPlatos;
+
+public:
+    void apilarPlato(const Plato& p) {
+        pilaPlatos.push(p);
+        cout<<"Plato apilado: "<<p<<endl;
+    }
+
+    void lavarPlato() {
+        Plato p;
+        if (pilaPlatos.pop(p)) {
+            cout<<"Lavando plato: "<<p<< endl;
+        } else {
+            cout<<"No hay platos para lavar."<<endl;
+        }
+    }
+
+    void mostrarEstado() {
+        cout<<"Platos sucios en la pila (de arriba a abajo):"<<endl;
+        pilaPlatos.print();
+    }
+};
+
+int main() {
+    Lavaplatos lavaplatos;
+    int opcion;
+    int idCounter=1;
+
+    do {
+        cout<<"--- Menú de Lavado de Platos ---" <<endl;
+        cout<<"................................"<<endl;
+        
+        cout<<"1. Apilar plato sucio"<<endl;
+        cout<<"2. Lavar plato"<<endl;
+        cout<<"3. Mostrar estado de la pila de platos"<<endl;
+        cout<<"4. Salir"<<endl;
+        cout<<"Ingrese una opción: ";
+        cin>>opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Plato p;
+            p.id=idCounter++;
+            cout<< "Ingrese tipo de plato (hondo, llano, etc.): ";
+            getline(cin, p.tipo);
+            lavaplatos.apilarPlato(p);
+        } else if (opcion==2) {
+            lavaplatos.lavarPlato();
+        } else if (opcion==3) {
+            lavaplatos.mostrarEstado();
+        }
+
+    } while (opcion!=4);
+
+    return 0;
+}
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
