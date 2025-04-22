@@ -1,0 +1,166 @@
+#include <iostream>
+#include <string>
+#include "Stack.h"
+
+using namespace std;
+
+struct Cliente {
+    int numeroTurno;
+    string nombre;
+    string transaccion;
+
+    friend ostream& operator<<(ostream& os, const Cliente& c) {
+        os<<"Turno: "<<c.numeroTurno<<", Nombre: "<<c.nombre<<", Transacción: "<<c.transaccion;
+        return os;
+    }
+};
+
+class Banco {
+private:
+    Stack<Cliente> colaEntrada;
+    Stack<Cliente> colaSalida;
+
+public:
+    void recibirCliente(const Cliente& c) {
+        colaEntrada.push(c);
+        cout<<"Cliente en espera: "<<c<<endl;
+    }
+
+    void atenderCliente() {
+        if (colaSalida.isEmpty()) {
+            while (!colaEntrada.isEmpty()) {
+                Cliente c;
+                colaEntrada.pop(c);
+                colaSalida.push(c);
+            }
+        }
+
+        Cliente c;
+        if (colaSalida.pop(c)) {
+            cout<<"Atendiendo al cliente: "<<c<<endl;
+        } else {
+            cout<<"No hay clientes en espera."<<endl;
+        }
+    }
+
+    void mostrarEstado() {
+        cout<<"Clientes en espera:"<<endl;
+        colaSalida.print();
+    }
+};
+
+int main() {
+    Banco banco;
+    int opcion;
+    int turnoCounter=1;
+
+    do {
+        cout<< "--- Menú de Gestión de Turnos ---"<<endl;
+        cout<<"..................................."<<endl;
+        
+        cout<<"1. Recibir cliente"<<endl;
+        cout<<"2. Atender cliente"<<endl;
+        cout<<"3. Mostrar estado de la cola"<<endl;
+        cout<<"4. Salir"<<endl;
+        cout<<"Ingrese una opción: ";
+        cin>>opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Cliente c;
+            c.numeroTurno=turnoCounter++;
+            cout << "Ingrese el nombre del cliente: ";
+            getline(cin, c.nombre);
+            cout << "Ingrese el tipo de transacción (depósito, retiro, etc.): ";
+            getline(cin, c.transaccion);
+            banco.recibirCliente(c);
+        } else if (opcion==2) {
+            banco.atenderCliente();
+        } else if (opcion==3) {
+            banco.mostrarEstado();
+        }
+
+    } while (opcion!=4);
+
+    return 0;
+}
+
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
