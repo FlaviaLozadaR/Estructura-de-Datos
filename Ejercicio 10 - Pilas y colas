@@ -1,0 +1,127 @@
+#include <iostream>
+#include <string>
+#include "Stack.h"
+
+using namespace std;
+
+struct Consulta {
+    string cliente;
+    string problema;
+
+    friend ostream& operator<<(ostream& os, const Consulta& c) {
+        os<<"Cliente: "<<c.cliente<<", Problema: "<<c.problema;
+        return os;
+    }
+};
+
+class ColaConsultas {
+private:
+    Stack<Consulta> entrada;
+    Stack<Consulta> salida;
+
+    void transferirSiNecesario() {
+        if (salida.isEmpty()) {
+            Consulta temp;
+            while (!entrada.isEmpty()) {
+                entrada.pop(temp);
+                salida.push(temp);
+            }
+        }
+    }
+
+public:
+    void agregarConsulta(const Consulta& c) {
+        entrada.push(c);
+        cout<<"Consulta agregada: "<<c<<endl;
+    }
+
+    void atenderConsulta() {
+        transferirSiNecesario();
+        if (salida.isEmpty()) {
+            cout<<"No hay consultas pendientes."<<endl;
+            return;
+        }
+
+        Consulta c;
+        salida.pop(c);
+        cout<<"Atendiendo consulta: "<<c<<endl;
+    }
+
+    void siguienteConsulta() {
+        transferirSiNecesario();
+        if (salida.isEmpty()) {
+            cout<<"No hay consultas por atender."<<endl;
+            return;
+        }
+
+        Consulta c;
+        salida.peek(c);
+        cout<<"Siguiente consulta a atender: "<<c<<endl;
+    }
+
+    void mostrarConsultas() {
+        Stack<Consulta> auxEntrada=entrada;
+        Stack<Consulta> auxSalida=salida;
+        Stack<Consulta> mostrarOrden;
+        Consulta temp;
+
+        while (!auxSalida.isEmpty()) {
+            auxSalida.pop(temp);
+            mostrarOrden.push(temp);
+        }
+
+        Stack<Consulta> tempStack;
+        while (!auxEntrada.isEmpty()) {
+            auxEntrada.pop(temp);
+            tempStack.push(temp);
+        }
+        while (!tempStack.isEmpty()) {
+            tempStack.pop(temp);
+            mostrarOrden.push(temp);
+        }
+
+        cout<<"Todas las consultas en cola:"<<endl;
+        mostrarOrden.print();
+    }
+};
+
+int main() {
+    ColaConsultas soporte;
+    int opcion;
+
+    do {
+        cout<<"\n---Soporte Técnico ---"<<endl;
+        cout<<"........................"<<endl; 
+        cout<<"1. Agregar consulta"<<endl;
+        cout<<"2. Atender consulta"<<endl;
+        cout<<"3. Ver siguiente consulta"<<endl;
+        cout<<"4. Mostrar todas las consultas"<<endl;
+        cout<<"5. Salir" << endl;
+        cout<<"Elija una opción: ";
+        cin>> opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Consulta c;
+            cout << "Nombre del cliente: ";
+            getline(cin, c.cliente);
+            cout << "Descripción del problema: ";
+            getline(cin, c.problema);
+            soporte.agregarConsulta(c);
+        } else if (opcion==2) {
+            soporte.atenderConsulta();
+        } else if (opcion==3) {
+            soporte.siguienteConsulta();
+        } else if (opcion==4) {
+            soporte.mostrarConsultas();
+        } else if (opcion!=5) {
+            cout<<"Opción inválida."<<endl;
+        }
+
+    } while (opcion!=5);
+
+    cout<<"Cerrando sistema de soporte"<<endl;
+    return 0;
+}
+
+Libreria usada: 
