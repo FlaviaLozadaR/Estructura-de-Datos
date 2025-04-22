@@ -1,0 +1,151 @@
+#include <iostream>
+#include <string>
+#include "Stack.h"
+
+using namespace std;
+
+struct Libro {
+    string titulo;
+    string autor;
+    string editorial;
+
+    friend ostream& operator<<(ostream &os, const Libro &libro) {
+        os<<"Título: "<< libro.titulo<< ", Autor: "<<libro.autor<<", Editorial: "<< libro.editorial;
+        return os;
+    }
+};
+
+int main() {
+    Stack<Libro> estanteriaTemporal;
+    int opcion;
+
+    do {
+        cout<<"........................................"<<endl;
+        cout<<"..........Biblioteca de Flavia.........."<<endl;
+        cout<<"..........Se reciben donaciones........."<<endl;
+        cout<<"........................................"<<endl;
+        cout<<""<<endl;
+        cout<<"1. Registrar donación"<<endl;
+        cout<<"2. Procesar última donación"<<endl;
+        cout<<"3. Ver libros en estantería temporal"<<endl;
+        cout<<"4. Ver cantidad de libros por registrar"<<endl;
+        cout<<"5. Salir"<<endl;
+        cout<<"Opción: "<<endl;
+        cin>>opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Libro nuevo;
+            cout<<"Ingrese el título del libro: ";
+            getline(cin, nuevo.titulo);
+            cout<<"Ingrese el autor del libro: ";
+            getline(cin, nuevo.autor);
+            cout<<"Ingrese la editorial del libro: ";
+            getline(cin, nuevo.editorial);
+            estanteriaTemporal.push(nuevo);
+            cout<<"Libro donado registrado correctamente.";
+
+        } else if (opcion==2) {
+            Libro libroProcesado;
+            if (estanteriaTemporal.pop(libroProcesado)) {
+                cout<< "Libro procesado: "<< libroProcesado<<endl;
+            } else {
+                cout << "No hay libros por registrar.";
+            }
+
+        } else if (opcion==3) {
+            cout<<"Libros en la estantería temporal:";
+            estanteriaTemporal.print();
+
+        } else if (opcion==4) {
+            cout<<"Cantidad de libros por registrar: " << estanteriaTemporal.getSize()<<endl;
+
+        } else if (opcion==5) {
+            cout<<"Saliendo del programa...";
+
+        } else {
+            cout<<"Opción inválida. Intente nuevamente.";
+        }
+    } while (opcion!=5);
+    return 0;
+}
+
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
