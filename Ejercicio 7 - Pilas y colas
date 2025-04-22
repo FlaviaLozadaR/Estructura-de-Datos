@@ -1,0 +1,200 @@
+#include <iostream>
+#include <string>
+#include <ctime>
+#include "Stack.h"
+
+using namespace std;
+
+struct Producto {
+    string nombre;
+    int cantidad;
+    string fechaVencimiento;
+
+    friend ostream& operator<<(ostream& os, const Producto& p) {
+        os<<"Producto: "<<p.nombre<<", Cantidad: "<<p.cantidad<<", Fecha de Vencimiento: "<<p.fechaVencimiento;
+        return os;
+    }
+
+    tm convertirFecha() const {
+        tm fecha={};
+        sscanf(fechaVencimiento.c_str(), "%d/%d/%d", &fecha.tm_mday, &fecha.tm_mon, &fecha.tm_year);
+        fecha.tm_mon-=1;
+        fecha.tm_year-=1900;
+        return fecha;
+    }
+};
+
+class Inventario {
+private:
+    Stack<Producto> estanteria;
+
+public:
+    void agregarProducto(const Producto& p) {
+        estanteria.push(p);
+        cout<<"Producto agregado: "<<p<<endl;
+    }
+
+    void sacarProducto() {
+        if (estanteria.isEmpty()) {
+            cout<<"No hay productos en la estantería."<<endl;
+            return;
+        }
+
+        Stack<Producto> pilaAuxiliar;
+        Producto productoMasAntiguo;
+        bool primero = true;
+
+        while (!estanteria.isEmpty()) {
+            Producto actual;
+            estanteria.pop(actual);
+
+            if (primero) {
+                productoMasAntiguo=actual;
+                primero=false;
+            } else {
+                tm fecha1=actual.convertirFecha();
+                tm fecha2=productoMasAntiguo.convertirFecha();
+                time_t t1=mktime(&fecha1);
+                time_t t2=mktime(&fecha2);
+
+                if (difftime(t1, t2)<0) {
+                    pilaAuxiliar.push(productoMasAntiguo);
+                    productoMasAntiguo=actual;
+                } else {
+                    pilaAuxiliar.push(actual);
+                }
+            }
+        }
+
+        cout<<"Producto más antiguo a usar: "<<productoMasAntiguo<<endl;
+
+        while (!pilaAuxiliar.isEmpty()) {
+            Producto p;
+            pilaAuxiliar.pop(p);
+            estanteria.push(p);
+        }
+    }
+
+    void mostrarEstanteria() const {
+        cout<<"Productos en la estantería:"<<endl;
+        estanteria.print();
+    }
+};
+
+int main() {
+    Inventario inventario;
+    int opcion;
+
+    do {
+        cout<<"\n--- 🛒 Menú de Inventario ---"<<endl;
+        cout<<"1. Agregar producto" <<endl;
+        cout<<"2. Sacar producto más antiguo"<<endl;
+        cout<<"3. Mostrar estantería"<<endl;
+        cout<<"4. Salir" << endl;
+        cout<<"Ingrese una opción: ";
+        cin>>opcion;
+        cin.ignore();
+
+        if (opcion==1) {
+            Producto p;
+            cout << "Nombre del producto: ";
+            getline(cin, p.nombre);
+            cout << "Cantidad: ";
+            cin >> p.cantidad;
+            cin.ignore();
+            cout << "Fecha de vencimiento (dd/mm/yyyy): ";
+            getline(cin, p.fechaVencimiento);
+            inventario.agregarProducto(p);
+        } else if (opcion==2) {
+            inventario.sacarProducto();
+        } else if (opcion==3) {
+            inventario.mostrarEstanteria();
+        } else if (opcion!=4) {
+            cout<<"Opción inválida."<<endl;
+        }
+
+    } while (opcion!=4);
+
+    cout<<"Programa finalizado."<<endl;
+    return 0;
+}
+
+Libreria usada: 
+#ifndef STACK_H
+#define STACK_H
+
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+template<typename T>
+class Stack {
+private:
+    class Node {
+    public:
+        T data;
+        Node *next;
+
+        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
+    };
+
+    Node *top;
+    int count;
+
+public:
+    Stack() : top(nullptr), count(0) {}
+
+    ~Stack() {
+        while (top != nullptr) {
+            Node *temp = top;
+            top = top->next;
+            delete temp;
+        }
+    }
+
+    void push(const T &value) {
+        Node *newNode = new Node(value, top);
+        top = newNode;
+        count++;
+    }
+
+    bool pop(T &value) {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        Node *temp = top;
+        top = top->next;
+        delete temp;
+        count--;
+        return true;
+    }
+
+    bool peek(T &value) const {
+        if (isEmpty()) {
+            return false;
+        }
+        value = top->data;
+        return true;
+    }
+
+    bool isEmpty() const {
+        return top == nullptr;
+    }
+
+    int getSize() const {
+        return count;
+    }
+
+    void print() const {
+        Node *current = top;
+        while (current != nullptr) {
+            cout << current->data << " -> ";
+            current = current->next;
+        }
+        cout << "NULL" << endl;
+    }
+};
+
+#endif // STACK_H
