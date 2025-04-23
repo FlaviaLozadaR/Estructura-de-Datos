@@ -1,122 +1,40 @@
 #include <iostream>
-#include "Stack.h"
+#include "Queue.h"
 
 using namespace std;
 
 int main() {
-    Stack<float> notas;
-    float nota;
-    char continuar;
+    Queue<float> notas;
+    int cantidad;
+    float nota, suma = 0;
 
-    cout<<"Ingreso de notas"<<endl;
+    cout<<"--- Registro de Notas ---"<<endl;
+    cout<<"¿Cuántas notas vas a ingresar? "<<endl;
+    cin>>cantidad;
 
-    do {
-        cout<<"Ingrese la nota del estudiante: ";
+    for (int i=0; i<cantidad; i++) {
+        cout<<"Ingresa la nota #" <<(i+1)<<": ";
         cin>>nota;
         notas.push(nota);
-
-        cout<<"¿Desea ingresar otra nota? (si/no): ";
-        cin>>continuar;
-    } while (continuar=='si'||continuar=='Si');
-
-    if (notas.isEmpty()) {
-        cout<<"No se ingresaron notas"<<endl;
-        return 0;
     }
 
-    float suma=0;
     int total=0;
-    float temp;
+    float valor;
 
     while (!notas.isEmpty()) {
-        notas.pop(temp);
-        suma+=temp;
-        total++;
+        if (notas.pop(valor)) {
+            suma+=valor;
+            total++;
+        }
     }
 
-    float promedio=suma/total;
-
-    cout<<"Promedio de notas: " <<promedio<<endl;
+    if (total>0){
+        float promedio=suma/total;
+        cout<<"El promedio de las notas es: "<<promedio<<endl;
+    } else{
+        cout<<"No se ingresaron notas.";
+    }
 
     return 0;
 }
 
-Libreria usada: 
-#ifndef STACK_H
-#define STACK_H
-
-#include <iostream>
-#include <stdexcept>
-
-using namespace std;
-
-template<typename T>
-class Stack {
-private:
-    class Node {
-    public:
-        T data;
-        Node *next;
-
-        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
-    };
-
-    Node *top;
-    int count;
-
-public:
-    Stack() : top(nullptr), count(0) {}
-
-    ~Stack() {
-        while (top != nullptr) {
-            Node *temp = top;
-            top = top->next;
-            delete temp;
-        }
-    }
-
-    void push(const T &value) {
-        Node *newNode = new Node(value, top);
-        top = newNode;
-        count++;
-    }
-
-    bool pop(T &value) {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        Node *temp = top;
-        top = top->next;
-        delete temp;
-        count--;
-        return true;
-    }
-
-    bool peek(T &value) const {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        return true;
-    }
-
-    bool isEmpty() const {
-        return top == nullptr;
-    }
-
-    int getSize() const {
-        return count;
-    }
-
-    void print() const {
-        Node *current = top;
-        while (current != nullptr) {
-            cout << current->data << " -> ";
-            current = current->next;
-        }
-        cout << "NULL" << endl;
-    }
-};
-
-#endif // STACK_H
