@@ -1,0 +1,46 @@
+#include <iostream>
+#include "Stack.h"
+
+using namespace std;
+
+struct Documento {
+    string titulo;
+    string fecha;
+
+    friend ostream &operator<<(ostream &os, const Documento &doc) {
+        os<<"Título: "<<doc.titulo<<", Fecha: "<<doc.fecha;
+        return os;
+    }
+};
+
+int main() {
+    Stack<Documento> pilaDocumentos;
+    char opcion;
+
+    cout<<"Gestión de documentos en oficina"<<endl;
+
+    do {
+        Documento doc;
+        cout<<"Ingrese el título del documento: ";
+        cin.ignore();
+        getline(cin, doc.titulo);
+
+        cout << "Ingrese la fecha de recepción (DD/MM/AAAA): ";
+        getline(cin, doc.fecha);
+
+        pilaDocumentos.push(doc);
+
+        cout<<"¿Desea ingresar otro documento? (si/no): ";
+        cin>>opcion;
+    } while (opcion == 's' || opcion == 'S');
+
+    cout<<"Revisión de documentos"<<endl;
+
+    Documento docTemp;
+    while (!pilaDocumentos.isEmpty()) {
+        pilaDocumentos.pop(docTemp);
+        cout<<"Revisando"<<docTemp<<endl;
+    }
+
+    return 0;
+}
