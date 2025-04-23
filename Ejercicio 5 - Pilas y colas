@@ -1,153 +1,79 @@
 #include <iostream>
 #include <string>
-#include "Stack.h"
+#include "queue.h"
 
 using namespace std;
 
-struct Plato {
-    int id;
-    string tipo;
+struct Trabajo {
+    string nombreArchivo;
+    int numeroPaginas;
 
-    friend ostream& operator<<(ostream& os, const Plato& p) {
-        os<<"ID: "<< p.id<<", Tipo: "<< p.tipo;
+    friend ostream& operator<<(ostream& os, const Trabajo& t) {
+        os<<"Archivo: "<<t.nombreArchivo<<", Páginas: "<<t.numeroPaginas;
         return os;
     }
 };
 
-class Lavaplatos {
-private:
-    Stack<Plato> pilaPlatos;
-
-public:
-    void apilarPlato(const Plato& p) {
-        pilaPlatos.push(p);
-        cout<<"Plato apilado: "<<p<<endl;
-    }
-
-    void lavarPlato() {
-        Plato p;
-        if (pilaPlatos.pop(p)) {
-            cout<<"Lavando plato: "<<p<< endl;
-        } else {
-            cout<<"No hay platos para lavar."<<endl;
-        }
-    }
-
-    void mostrarEstado() {
-        cout<<"Platos sucios en la pila (de arriba a abajo):"<<endl;
-        pilaPlatos.print();
-    }
-};
-
-int main() {
-    Lavaplatos lavaplatos;
+int main(){
+    Queue<Trabajo> colaImpresion;
     int opcion;
-    int idCounter=1;
 
     do {
-        cout<<"--- Menú de Lavado de Platos ---" <<endl;
-        cout<<"................................"<<endl;
-        
-        cout<<"1. Apilar plato sucio"<<endl;
-        cout<<"2. Lavar plato"<<endl;
-        cout<<"3. Mostrar estado de la pila de platos"<<endl;
-        cout<<"4. Salir"<<endl;
-        cout<<"Ingrese una opción: ";
+        cout<<".............................."<<endl;
+        cout<< ".....Gestor de Impresora....."<<endl;
+        cout<<".............................."<<endl;
+        cout<<"1. Agregar trabajo de impresión"<<endl;
+        cout<<"2. Procesar siguiente trabajo"<<endl;
+        cout<<"3. Ver siguiente trabajo a imprimir"<<endl;
+        cout<<"4. Mostrar todos los trabajos en cola"<<endl;
+        cout<<"5. Salir"<<endl;
+        cout<<"Seleccione una opción: ";
         cin>>opcion;
-        cin.ignore();
 
-        if (opcion==1) {
-            Plato p;
-            p.id=idCounter++;
-            cout<< "Ingrese tipo de plato (hondo, llano, etc.): ";
-            getline(cin, p.tipo);
-            lavaplatos.apilarPlato(p);
-        } else if (opcion==2) {
-            lavaplatos.lavarPlato();
-        } else if (opcion==3) {
-            lavaplatos.mostrarEstado();
+        switch (opcion){
+            case 1: {
+                Trabajo nuevo;
+                cout<<"Nombre del archivo: ";
+                cin.ignore();
+                getline(cin, nuevo.nombreArchivo);
+                cout<<"Número de páginas: ";
+                cin>>nuevo.numeroPaginas;
+                colaImpresion.push(nuevo);
+                cout<<"Trabajo agregado a la cola.";
+                break;
+            }
+            case 2:{
+                Trabajo procesado;
+                if(colaImpresion.pop(procesado)) {
+                    cout<<"Imprimiendo trabajo: "<<procesado<<endl;
+                } else{
+                    cout<<"No hay trabajos en la cola.";
+                }
+                break;
+            }
+            case 3:{
+                Trabajo siguiente;
+                if (colaImpresion.peek(siguiente)) {
+                    cout<<"Siguiente trabajo a imprimir: "<<siguiente<<endl;
+                } else {
+                    cout<<"No hay trabajos pendientes.";
+                }
+                break;
+            }
+            case 4:{
+                cout<<"Trabajos en cola: ";
+                colaImpresion.print();
+                break;
+            }
+            case 5:{
+                cout<<"Saliendo del sistema...";
+                break;
+            }
+            default: {
+                cout<<"Opción inválida. Intente nuevamente.";
+                break;
+            }
         }
-
-    } while (opcion!=4);
-
+    } while (opcion!=5);
     return 0;
 }
-Libreria usada: 
-#ifndef STACK_H
-#define STACK_H
-
-#include <iostream>
-#include <stdexcept>
-
-using namespace std;
-
-template<typename T>
-class Stack {
-private:
-    class Node {
-    public:
-        T data;
-        Node *next;
-
-        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
-    };
-
-    Node *top;
-    int count;
-
-public:
-    Stack() : top(nullptr), count(0) {}
-
-    ~Stack() {
-        while (top != nullptr) {
-            Node *temp = top;
-            top = top->next;
-            delete temp;
-        }
-    }
-
-    void push(const T &value) {
-        Node *newNode = new Node(value, top);
-        top = newNode;
-        count++;
-    }
-
-    bool pop(T &value) {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        Node *temp = top;
-        top = top->next;
-        delete temp;
-        count--;
-        return true;
-    }
-
-    bool peek(T &value) const {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        return true;
-    }
-
-    bool isEmpty() const {
-        return top == nullptr;
-    }
-
-    int getSize() const {
-        return count;
-    }
-
-    void print() const {
-        Node *current = top;
-        while (current != nullptr) {
-            cout << current->data << " -> ";
-            current = current->next;
-        }
-        cout << "NULL" << endl;
-    }
-};
-
-#endif // STACK_H
