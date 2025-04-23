@@ -1,0 +1,74 @@
+#include <iostream>
+#include <string>
+#include "queue.h"
+
+using namespace std;
+
+struct Pasajero {
+    string nombre;
+    string destino;
+
+    friend ostream& operator<<(ostream& os, const Pasajero& p) {
+        os<<"Nombre: "<<p.nombre<<", Destino: "<<p.destino;
+        return os;
+    }
+};
+
+int main() {
+    Queue<Pasajero> colaPasajeros;
+    int opcion;
+
+    do {
+        cout<<"--- Estación de tren ---"<<endl;
+        cout<<"1. Agregar pasajero a la fila"<<endl;
+        cout<<"2. Atender pasajero"<<endl;
+        cout<<"3. Ver siguiente pasajero"<<endl;
+        cout<<"4. Mostrar toda la fila"<<endl;
+        cout<<"5. Salir."<<endl;
+        cout<<"Elige una opción: ";
+        cin>>opcion;
+
+        switch (opcion) {
+            case 1:{
+                Pasajero nuevo;
+                cin.ignore();
+                cout<<"Nombre del pasajero: ";
+                getline(cin, nuevo.nombre);
+                cout<<"Destino: ";
+                getline(cin, nuevo.destino);
+                colaPasajeros.push(nuevo);
+                cout<<"Pasajero agregado a la fila.";
+                break;
+            }
+            case 2: {
+                Pasajero atendido;
+                if (colaPasajeros.pop(atendido)) {
+                    cout<<"Atendiendo a: "<<atendido<<endl;
+                } else {
+                    cout<<"No hay pasajeros en la fila.";
+                }
+                break;
+            }
+            case 3:{
+                Pasajero siguiente;
+                if (colaPasajeros.peek(siguiente)){
+                    cout<<"Siguiente pasajero: "<<siguiente<<endl;
+                } else{
+                    cout<<"La fila está vacía.";
+                }
+                break;
+            }
+            case 4:{
+                cout<<"Pasajeros en la fila: ";
+                colaPasajeros.print();
+                break;
+            }
+            case 5:
+                cout<<"Saliendo...";
+                break;
+            default:
+                cout<<"Opción no válida.";
+        }
+    } while (opcion!=5);
+    return 0;
+}
