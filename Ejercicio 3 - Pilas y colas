@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "Stack.h"
+#include "queue.h"
 
 using namespace std;
 
@@ -9,172 +9,65 @@ struct Paciente {
     int edad;
     string motivo;
 
-    friend ostream& operator<<(ostream& os, const Paciente& p){
-        os<<"Nombre: "<<p.nombre<<", Edad: "<<p.edad<<", Motivo: "<<p.motivo;
+    friend ostream& operator<<(ostream& os, const Paciente& p) {
+        os<<"Nombre: "<<p.nombre<<", Edad: "<<p.edad<<", Motivo: "<< p.motivo;
         return os;
     }
 };
 
-class Clinica {
-    Stack<Paciente> entrada;
-    Stack<Paciente> salida;
-
-public:
-    void registrarPaciente(const Paciente& paciente){
-        entrada.push(paciente);
-        cout<<"Paciente registrado: "<<paciente<<endl;
-    }
-
-    void atenderPaciente(){
-        if(salida.isEmpty()){
-            while (!entrada.isEmpty()){
-                Paciente p;
-                entrada.pop(p);
-                salida.push(p);
-            }
-        }
-
-        Paciente p;
-        if(salida.pop(p)){
-            cout<<"Atendiendo a: "<<p<<endl;
-        } else {
-            cout<<"No hay pacientes para atender."<<endl;
-        }
-    }
-    void mostrarEstado(){
-        cout<<"Paciente en espera (en orden de llegada): "<<endl;
-
-        Stack<Paciente> temp=entrada;
-        while (!temp.isEmpty()) {
-            Paciente p;
-            temp.pop(p);
-            cout<<p<<endl;
-        }
-
-        if (entrada.isEmpty() && salida.isEmpty()) {
-            cout<<"No hay pacientes registrados."<<endl;
-        }
-
-    }
-};
-
-int main() {
-    Clinica clinica;
+int main(){
+    Queue<Paciente> salaDeEspera;
     int opcion;
-    string nombre;
-    int edad;
-    string motivo;
 
     do {
-        cout<<"------------------------------------"<<endl;
-        cout<<"---Menú de Atención de Pacientes ---"<<endl;
-        cout<<"-------------------------------------"<<endl; 
-                 cout<<"1.Registrar paciente"<<endl;
-                 cout<<"2.Atender paciente"<<endl;
-                 cout<<"3.Mostrar estado de la clínica"<<endl;
-                 cout<<"4.Salir"<<endl;
-                cout<<"Ingrese una opción: ";
-        cin>> opcion;
-        cin.ignore();
+        cout<<"......................................"<<endl; 
+        cout<<"....Clínica - Gestión de Pacientes...."<<endl;
+        cout<<"......................................"<<endl; 
+        cout<<"1. Registrar llegada de paciente"<<endl;
+        cout<<"2. Atender paciente"<<endl;
+        cout<<"3. Mostrar pacientes en espera"<<endl;
+        cout<<"4. Salir"<<endl;
+        cout<<"Seleccione una opción: ";
+        cin>>opcion;
 
-        if (opcion==1) {
-            Paciente p;
-            cout<<"Ingrese nombre del paciente: ";
-            getline(cin, p.nombre);
-            cout<<"Ingrese edad del paciente: ";
-            cin>>p.edad;
-            cin.ignore();
-            cout<<"Ingrese motivo de consulta: ";
-            getline(cin, p.motivo);
-
-            clinica.registrarPaciente(p);
-        } else if (opcion==2) {
-            clinica.atenderPaciente();
-        } else if (opcion==3) {
-            clinica.mostrarEstado();
+        switch (opcion){
+            case 1:{
+                Paciente nuevo;
+                cout<<"Ingrese el nombre del paciente: ";
+                cin.ignore();
+                getline(cin, nuevo.nombre);
+                cout<<"Ingrese la edad: ";
+                cin>>nuevo.edad;
+                cin.ignore();
+                cout<<"Ingrese el motivo de la consulta: ";
+                getline(cin, nuevo.motivo);
+                salaDeEspera.push(nuevo);
+                cout<<"Paciente registrado correctamente.";
+                break;
+            }
+            case 2:{
+                Paciente atendido;
+                if (salaDeEspera.pop(atendido)){
+                    cout<<"Paciente atendido: "<<atendido<<endl;
+                } else{
+                    cout<<"No hay pacientes en espera.";
+                }
+                break;
+            }
+            case 3:{
+                cout<<"Pacientes en espera: ";
+                salaDeEspera.print();
+                break;
+            }
+            case 4:{
+                cout<<"Saliendo del sistema...";
+                break;
+            }
+            default:{
+                cout<<"Opción inválida. Intente de nuevo.";
+                break;
+            }
         }
-
     } while (opcion!=4);
-
     return 0;
 }
-
-libreria usada: 
-#ifndef STACK_H
-#define STACK_H
-
-#include <iostream>
-#include <stdexcept>
-
-using namespace std;
-
-template<typename T>
-class Stack {
-private:
-    class Node {
-    public:
-        T data;
-        Node *next;
-
-        Node(const T &value, Node *next = nullptr) : data(value), next(next) {}
-    };
-
-    Node *top;
-    int count;
-
-public:
-    Stack() : top(nullptr), count(0) {}
-
-    ~Stack() {
-        while (top != nullptr) {
-            Node *temp = top;
-            top = top->next;
-            delete temp;
-        }
-    }
-
-    void push(const T &value) {
-        Node *newNode = new Node(value, top);
-        top = newNode;
-        count++;
-    }
-
-    bool pop(T &value) {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        Node *temp = top;
-        top = top->next;
-        delete temp;
-        count--;
-        return true;
-    }
-
-    bool peek(T &value) const {
-        if (isEmpty()) {
-            return false;
-        }
-        value = top->data;
-        return true;
-    }
-
-    bool isEmpty() const {
-        return top == nullptr;
-    }
-
-    int getSize() const {
-        return count;
-    }
-
-    void print() const {
-        Node *current = top;
-        while (current != nullptr) {
-            cout << current->data << " -> ";
-            current = current->next;
-        }
-        cout << "NULL" << endl;
-    }
-};
-
-#endif // STACK_H
