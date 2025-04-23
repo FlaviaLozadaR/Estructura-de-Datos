@@ -1,76 +1,75 @@
 #include <iostream>
 #include <string>
-#include "queue.h"
+#include "Stack.h"
 
 using namespace std;
 
-struct Trabajo {
-    string nombreArchivo;
-    int numeroPaginas;
+struct Plato {
+    int id;
+    string tipo;
 
-    friend ostream& operator<<(ostream& os, const Trabajo& t) {
-        os<<"Archivo: "<<t.nombreArchivo<<", Páginas: "<<t.numeroPaginas;
+    friend ostream& operator<<(ostream& os, const Plato& p) {
+        os<<"ID: "<<p.id<<", Tipo: "<<p.tipo;
         return os;
     }
 };
 
 int main(){
-    Queue<Trabajo> colaImpresion;
+    Stack<Plato> pilaPlatos;
     int opcion;
 
     do {
-        cout<<".............................."<<endl;
-        cout<< ".....Gestor de Impresora....."<<endl;
-        cout<<".............................."<<endl;
-        cout<<"1. Agregar trabajo de impresión"<<endl;
-        cout<<"2. Procesar siguiente trabajo"<<endl;
-        cout<<"3. Ver siguiente trabajo a imprimir"<<endl;
-        cout<<"4. Mostrar todos los trabajos en cola"<<endl;
-        cout<<"5. Salir"<<endl;
+        cout<<"--- Sistema de Lavado de Platos ---";
+        cout<<"------------------------------------"<<endl;
+        cout<<"1. Agregar plato sucio";
+        cout<<"2. Lavar plato (quitar de la cima)";
+        cout<<"3. Ver plato que está en la cima";
+        cout<<"4. Mostrar pila de platos";
+        cout<<"5. Salir";
         cout<<"Seleccione una opción: ";
         cin>>opcion;
 
-        switch (opcion){
-            case 1: {
-                Trabajo nuevo;
-                cout<<"Nombre del archivo: ";
+        switch (opcion) {
+            case 1:{
+                Plato nuevo;
+                cout<<"Ingrese ID del plato: ";
+                cin>>nuevo.id;
                 cin.ignore();
-                getline(cin, nuevo.nombreArchivo);
-                cout<<"Número de páginas: ";
-                cin>>nuevo.numeroPaginas;
-                colaImpresion.push(nuevo);
-                cout<<"Trabajo agregado a la cola.";
+                cout<<"Ingrese tipo de plato (hondo, llano, etc.): ";
+                getline(cin, nuevo.tipo);
+                pilaPlatos.push(nuevo);
+                cout<<"Plato agregado a la pila.";
                 break;
             }
             case 2:{
-                Trabajo procesado;
-                if(colaImpresion.pop(procesado)) {
-                    cout<<"Imprimiendo trabajo: "<<procesado<<endl;
-                } else{
-                    cout<<"No hay trabajos en la cola.";
+                Plato lavado;
+                if (pilaPlatos.pop(lavado)) {
+                    cout<<"Plato lavado: "<<lavado<<endl;
+                } else {
+                    cout<<"No hay platos para lavar.";
                 }
                 break;
             }
             case 3:{
-                Trabajo siguiente;
-                if (colaImpresion.peek(siguiente)) {
-                    cout<<"Siguiente trabajo a imprimir: "<<siguiente<<endl;
+                Plato cima;
+                if (pilaPlatos.peek(cima)) {
+                    cout<<"Plato en la cima: "<<cima<<endl;
                 } else {
-                    cout<<"No hay trabajos pendientes.";
+                    cout<<"No hay platos en la pila.";
                 }
                 break;
             }
-            case 4:{
-                cout<<"Trabajos en cola: ";
-                colaImpresion.print();
+            case 4: {
+                cout<<"Pila de platos: ";
+                pilaPlatos.print();
                 break;
             }
             case 5:{
                 cout<<"Saliendo del sistema...";
                 break;
             }
-            default: {
-                cout<<"Opción inválida. Intente nuevamente.";
+            default:{
+                cout<<"Opción inválida. Intente de nuevo.";
                 break;
             }
         }
