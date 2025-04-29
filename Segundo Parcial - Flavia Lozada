@@ -1,0 +1,86 @@
+//codigo del segundo parcial en el que se usó ambas librerias tanto Stack.h como quehue.h
+
+#include <iostream>
+#include "queue.h"
+#include "Stack.h"
+#include <iomanip>
+
+using namespace std;
+
+struct Caja{
+    int id;
+    float peso;
+
+    friend ostream& operator<<(ostream& os, const Caja& c) {
+        os<<"Caja("<<c.id<<" , "<<c.peso<<" kg)";
+        return os;
+    }
+};
+
+int main() {
+    Stack<Caja> zonaRecepcion;
+
+    zonaRecepcion.push({1, 8.0});
+    zonaRecepcion.push({2, 12.5});
+    zonaRecepcion.push({3, 9.0});
+    zonaRecepcion.push({4, 15.0});
+    zonaRecepcion.push({5, 7.5});
+
+    Queue<Caja> cintaA;
+    Queue<Caja> cintaB;
+
+    Caja c;
+    Stack<Caja> temporal;
+
+    while(zonaRecepcion.pop(c))
+    {
+        temporal.push(c);
+    }
+
+    while(temporal.pop(c))
+    {
+        if(c.peso<=10)
+        {
+            cintaA.push(c);
+        }
+        else
+        {
+            cintaB.push(c);
+        }
+    }
+
+    auto procesarCinta=[](Queue<Caja> &cinta, const string &nombre) {
+        int cantidad=0;
+        float pesoTotal=0;
+        Caja caja;
+        Queue<Caja> aux;
+
+        while(cinta.pop(caja))
+        {
+            aux.push(caja);
+            cantidad++;
+            pesoTotal+=caja.peso;
+        }
+
+        while(aux.pop(caja))
+        {
+            cinta.push(caja);
+        }
+
+        float promedio=(cantidad>0)?(pesoTotal/cantidad):0;
+
+        cout<<"..........................."<<endl;
+        cout<<nombre<<endl;
+        cout<<"............................"<<endl;
+        cout<<"Cantidad de cajas: "<<cantidad<<endl;
+        cout<<fixed<<setprecision(2);
+        cout<<"Peso total: "<<pesoTotal<<" kg"<<endl;
+        cout<<"Peso promedio: "<< promedio<<"kg"<<endl;
+        cout<<"............................."<<endl;
+    };
+
+    procesarCinta(cintaA, "Cinta transportadora A");
+    procesarCinta(cintaB, "Cinta transportadora B");
+
+    return 0;
+}
